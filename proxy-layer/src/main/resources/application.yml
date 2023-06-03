@@ -1,0 +1,63 @@
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+    healthcheck:
+      enabled: true
+    instance:
+      instance-id: ${spring.application.name}:${random.value}
+
+spring:
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: 'true'
+  application:
+    name: proxy-layer
+  http:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+      enabled: 'true'
+  devtools:
+    restart:
+      enabled: 'true'
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cloud:
+    config:
+      enabled: 'false '
+nuxeo:
+  contentType: application/json
+  baseURL: http://127.0.0.1:8080/nuxeo
+  password: Administrator
+  file:
+    download:
+      url: http://127.0.0.1:8080/nuxeo/ui/#!/doc/
+  accessToken: 1bfdfd02-8446-42d3-a712-715b6a5863ad
+  user: Administrator
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          filter:
+            CommonsRequestLoggingFilter: DEBUG
+server:
+  use-forward-headers: 'true'
+  servlet:
+    context-path: /smart-doc
+  port: '8181'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - mappings
+          - env
+          - health
+          - info

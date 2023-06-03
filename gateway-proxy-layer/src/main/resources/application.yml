@@ -1,0 +1,117 @@
+logging:
+  level:
+    reactor:
+      netty: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+
+server:
+  port: 8760
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      global-filter:
+        - LoggingFilter
+      routes:
+        - id: proxyLayer-api-v1-get-path
+          uri: lb://proxy-layer
+          predicates:
+            - Path=/smart-doc/api/v1/get/path/**
+            - Header= X-Client-Id, [A-Z]+
+          metadata:
+            redirectURI: lb://proxy-layer/smart-doc/api/v1/document/get/path
+            clients: [ "PAT","MATREF" ]
+            folders: [ "PAT=/RD/01 New AI Research/5 Portfolio Management/Portfolio Process/CPR Publications",
+                       "MATREF=/TE/Formulation Development/Composition cards" ]
+          filters:
+            - RedirectionFilter
+        - id: proxyLayer-api-v1-document-upload
+          uri: lb://proxy-layer
+          predicates:
+            - Path=/api/v1/document/upload/**
+            - Header= X-Client-Id, [A-Z]+
+          metadata:
+            redirectURI: lb://proxy-layer/smart-doc/api/v1/document/upload
+            clients: [ "PAT","MATREF" ]
+            folders: [ "PAT=/RD/01 New AI Research/5 Portfolio Management/Portfolio Process/CPR Publications",
+                       "MATREF=/TE/Formulation Development/Composition cards" ]
+          filters:
+            - RedirectionFilter
+
+        - id: proxyLayer-api-v1-document-get-uid
+          uri: lb://proxy-layer
+          predicates:
+            - Path=/api/v1/document/get/uid/**
+          metadata:
+            redirectURI: lb://proxy-layer/smart-doc/api/v1/document/get/uid
+            clients: [ "PAT","MATREF" ]
+            folders: [ "PAT=/RD/01 New AI Research/5 Portfolio Management/Portfolio Process/CPR Publications",
+                       "MATREF=/TE/Formulation Development/Composition cards" ]
+
+
+        - id: proxyLayer-api-v1-document-update
+          uri: lb://proxy-layer
+          predicates:
+            - Path=/smart-doc/api/v1/document/update/**
+            - Header= X-Client-Id, [A-Z]+
+          metadata:
+            redirectURI: lb://proxy-layer/smart-doc/api/v1/document/update
+            clients: [ "PAT","MATREF" ]
+            folders: ["PAT=/RD/01 New AI Research/5 Portfolio Management/Portfolio Process/CPR Publications",
+            "MATREF=/TE/Formulation Development/Composition cards"]
+          filters:
+            - RedirectionFilter
+
+        - id: proxyLayer-api-v1-document-delete
+          uri: lb://proxy-layer-delete
+          predicates:
+            - Path=/smart-doc/api/v1/document/delete**
+            - Header= X-Client-Id, [A-Z]+
+          metadata:
+            redirectURI: lb://proxy-layer/smart-doc/api/v1/document/delete
+            clients: [ "PAT","MATREF" ]
+            folders: [ "PAT=/RD/01 New AI Research/5 Portfolio Management/Portfolio Process/CPR Publications",
+                       "MATREF=/TE/Formulation Development/Composition cards" ]
+          filters:
+            - RedirectionFilter
+        - id: registry
+          uri: lb://eureka
+          predicates:
+            - Path=/registry/**
+          filters:
+            - StripPrefix=1
+        - id: eureka
+          uri: lb://eureka
+          predicates:
+            - Path=/eureka/**
+          filters:
+            - StripPrefix=1
+
+
+info:
+  app:
+    name: ${spring.application.name}
+
+eureka:
+  client:
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER:http://localhost:8761/eureka}
+    healthcheck:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - mappings
+          - env
+          - health
+          - info
+

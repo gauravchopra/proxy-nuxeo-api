@@ -1,0 +1,28 @@
+version: '3'
+services:
+  registry:
+    image: smartdoc-proxy-registry:latest
+    container_name: registry
+    expose: 
+      - "8761"
+  proxy-layer-service:
+    image: smartdoc-proxy-service:latest
+    container_name: proxy-layer-service
+    expose: 
+      - "8762"
+    depends_on: 
+      - "registry"
+    environment:
+      - JAVA_OPTS=
+        -DEUREKA_SERVER=http://registry:8761/eureka
+  gateway:
+    image: smartdoc-proxy-gateway:latest
+    container_name: gateway
+    ports:
+      - "127.0.0.1:8080:8760"
+    depends_on: 
+      - registry
+      - proxy-layer-service
+    environment:
+      - JAVA_OPTS=
+        -DEUREKA_SERVER=http://registry:8761/eureka
